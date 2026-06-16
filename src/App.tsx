@@ -2,11 +2,11 @@ import { useState, useEffect } from "react";
 import prism from "prismjs";
 import Markdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
-import axios from "axios";
 import SimpleCodeEditor from "react-simple-code-editor";
 import LoginModal from "./components/LoginModal";
 import "prismjs/themes/prism-tomorrow.css";
 import "highlight.js/styles/github-dark.css";
+import AxiosInstance from "./helpers/interceptor";
 
 type ModuleWithDefault<T> = T & {
   default?: T;
@@ -34,12 +34,13 @@ function App() {
   async function reviewCode() {
     try {
       setLoading(true);
-      const response = await axios.post(
+      const response = await AxiosInstance.post(
         `${import.meta.env.VITE_APP_BACKEND_URL}/api/ai/get-review`,
         {
           code,
         },
       );
+
       setReview(response.data);
     } finally {
       setLoading(false);

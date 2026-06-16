@@ -6,6 +6,8 @@ type LoginModalProps = {
 };
 
 function LoginModal({ open, onClose }: LoginModalProps) {
+	const [name, setName] = useState("");
+	const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -15,13 +17,22 @@ function LoginModal({ open, onClose }: LoginModalProps) {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     // TODO: wire up to backend auth endpoint
-    console.log("login with", { email, password });
+
+		if(isLogin){
+			console.log("login with", { email, password });
+		}else{
+			console.log("sign up with", { name, email, password });
+		}
   }
 
   function handleGoogleLogin() {
     // TODO: wire up Google OAuth flow
     console.log("login with Google");
   }
+
+	function handleSignUp(){
+	 setIsLogin(!isLogin)
+	}
 
   return (
     <div
@@ -115,6 +126,20 @@ function LoginModal({ open, onClose }: LoginModalProps) {
         </div>
 
         <form className="flex flex-col gap-4" onSubmit={handleSubmit}>
+          {!isLogin && (
+            <label className="flex flex-col gap-1.5">
+              <span className="text-xs font-medium text-white/60">Name</span>
+              <input
+                type="text"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="John Doe"
+                autoComplete="name"
+                required
+                className="w-full rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm text-white outline-none transition placeholder:text-white/25 focus:border-violet-300/60 focus:ring-2 focus:ring-violet-300/15"
+              />
+            </label>
+          )}
           <label className="flex flex-col gap-1.5">
             <span className="text-xs font-medium text-white/60">Email</span>
             <input
@@ -163,18 +188,20 @@ function LoginModal({ open, onClose }: LoginModalProps) {
             type="submit"
             className="mt-1 w-full rounded-xl bg-linear-to-r from-violet-300 to-indigo-300 px-4 py-2.5 text-sm font-semibold text-black shadow-lg shadow-violet-500/20 transition hover:from-violet-200 hover:to-indigo-200 active:scale-[0.99]"
           >
-            Sign in
+            {isLogin ? "Sign in" : "Sign up"}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-white/45">
-          Don't have an account?{" "}
-          <a
-            href="#"
+          {isLogin
+            ? "Don't have an account? "
+            : "Already have an account? "}
+          <button
+            onClick={() => handleSignUp()}
             className="font-medium text-violet-300 transition hover:text-violet-200"
           >
-            Sign up
-          </a>
+            {isLogin ? "Sign up" : "Sign in"}
+          </button>
         </p>
       </div>
     </div>
