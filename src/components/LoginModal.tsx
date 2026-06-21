@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { useLogin, useRegister } from "../hooks/useAuth";
+import { notify, getErrorMessage } from "../helpers/toast";
 
 type LoginModalProps = {
   open: boolean;
@@ -6,33 +8,42 @@ type LoginModalProps = {
 };
 
 function LoginModal({ open, onClose }: LoginModalProps) {
-	const [name, setName] = useState("");
-	const [isLogin, setIsLogin] = useState(true);
+  const [name, setName] = useState("");
+  const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
+  const loginMutation = useLogin();
+  const registerMutation = useRegister();
+  const isSubmitting = loginMutation.isPending || registerMutation.isPending;
+
   if (!open) return null;
 
-  function handleSubmit(e: React.FormEvent) {
+  async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    // TODO: wire up to backend auth endpoint
 
-		if(isLogin){
-			console.log("login with", { email, password });
-		}else{
-			console.log("sign up with", { name, email, password });
-		}
+    try {
+      if (isLogin) {
+        const res = await loginMutation.mutateAsync({ email, password });
+        notify.success(res.data.message ?? "Logged in");
+      } else {
+        const res = await registerMutation.mutateAsync({ email, password });
+        notify.success(res.data.message ?? "Account created");
+      }
+      onClose();
+    } catch (err) {
+      notify.error(getErrorMessage(err));
+    }
   }
 
   function handleGoogleLogin() {
-    // TODO: wire up Google OAuth flow
-    console.log("login with Google");
+    window.location.href = `${import.meta.env.VITE_APP_BACKEND_URL}/auth/google`;
   }
 
-	function handleSignUp(){
-	 setIsLogin(!isLogin)
-	}
+  function handleSignUp() {
+    setIsLogin(!isLogin);
+  }
 
   return (
     <div
@@ -46,7 +57,6 @@ function LoginModal({ open, onClose }: LoginModalProps) {
         onClick={(e) => e.stopPropagation()}
         className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-white/10 bg-[#0c0c11] p-7 text-white shadow-2xl shadow-black/60 animate-modal-in"
       >
-        {/* Glow accent */}
         <div className="pointer-events-none absolute -top-24 left-1/2 h-48 w-48 -translate-x-1/2 rounded-full bg-violet-500/20 blur-3xl" />
 
         <button
@@ -86,10 +96,12 @@ function LoginModal({ open, onClose }: LoginModalProps) {
             </svg>
           </div>
           <h2 id="login-title" className="text-xl font-semibold">
-            Welcome back
+            {isLogin ? "Welcome back" : "Create your account"}
           </h2>
           <p className="mt-1 text-sm text-white/45">
-            Sign in to review your PR
+            {isLogin
+              ? "Sign in to review your PR"
+              : "Sign up to start reviewing your code"}
           </p>
         </div>
 
@@ -186,16 +198,32 @@ function LoginModal({ open, onClose }: LoginModalProps) {
 
           <button
             type="submit"
-            className="mt-1 w-full rounded-xl bg-linear-to-r from-violet-300 to-indigo-300 px-4 py-2.5 text-sm font-semibold text-black shadow-lg shadow-violet-500/20 transition hover:from-violet-200 hover:to-indigo-200 active:scale-[0.99]"
+            disabled={isSubmitting}
+            className="mt-1 flex w-full items-center justify-center gap-2 rounded-xl bg-linear-to-r from-violet-300 to-indigo-300 px-4 py-2.5 text-sm font-semibold text-black shadow-lg shadow-violet-500/20 transition hover:from-violet-200 hover:to-indigo-200 active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-60"
           >
+            {isSubmitting && (
+              <svg className="h-4 w-4 animate-spin" viewBox="0 0 24 24" fill="none">
+                <circle
+                  className="opacity-25"
+                  cx="12"
+                  cy="12"
+                  r="10"
+                  stroke="currentColor"
+                  strokeWidth="4"
+                />
+                <path
+                  className="opacity-75"
+                  fill="currentColor"
+                  d="M4 12a8 8 0 0 1 8-8V0C5.373 0 0 5.373 0 12h4z"
+                />
+              </svg>
+            )}
             {isLogin ? "Sign in" : "Sign up"}
           </button>
         </form>
 
         <p className="mt-6 text-center text-sm text-white/45">
-          {isLogin
-            ? "Don't have an account? "
-            : "Already have an account? "}
+          {isLogin ? "Don't have an account? " : "Already have an account? "}
           <button
             onClick={() => handleSignUp()}
             className="font-medium text-violet-300 transition hover:text-violet-200"

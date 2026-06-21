@@ -3,6 +3,7 @@ import axios, { type InternalAxiosRequestConfig } from "axios";
 const BASE_URL = import.meta.env.VITE_APP_BACKEND_URL;
 const AxiosInstance = axios.create({
   baseURL: BASE_URL,
+  withCredentials: true,
 });
 
 AxiosInstance.interceptors.request.use((config: InternalAxiosRequestConfig) => {
