@@ -6,10 +6,23 @@ import type {
   Pull,
   Review,
   ReviewIssue,
+  ReviewListItem,
   PostReviewResult,
   GithubConnection,
   CreateReviewInput,
 } from "../types/github";
+
+export const getReviewsApi = (): Promise<
+  AxiosResponse<ApiResponse<ReviewListItem[]>>
+> => {
+  return AxiosInstance.get<ApiResponse<ReviewListItem[]>>("/reviews");
+};
+
+export const getReviewApi = (
+  id: string,
+): Promise<AxiosResponse<ApiResponse<Review>>> => {
+  return AxiosInstance.get<ApiResponse<Review>>(`/reviews/${id}`);
+};
 
 export const getConnectionApi = (): Promise<
   AxiosResponse<ApiResponse<GithubConnection[]>>

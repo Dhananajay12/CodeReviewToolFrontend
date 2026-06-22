@@ -5,6 +5,7 @@ import { useAuth } from "./hooks/useAuth";
 
 const CodeReview = lazy(() => import("./components/CodeReview"));
 const PrReview = lazy(() => import("./components/PrReview"));
+const History = lazy(() => import("./components/History"));
 
 function ViewFallback() {
   return (
@@ -98,7 +99,13 @@ function App() {
           }`}
         >
           <Suspense fallback={<ViewFallback />}>
-            {user && view === "pr" ? <PrReview /> : <CodeReview />}
+            {user && view === "pr" ? (
+              <PrReview />
+            ) : user && view === "history" ? (
+              <History />
+            ) : (
+              <CodeReview />
+            )}
           </Suspense>
         </main>
       </div>

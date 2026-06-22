@@ -1,6 +1,7 @@
 import {
   useMutation,
   useQuery,
+  useQueryClient,
   type UseMutationResult,
   type UseQueryResult,
 } from "@tanstack/react-query";
@@ -11,16 +12,43 @@ import {
   createReviewApi,
   toggleIssueApi,
   postReviewApi,
+  getReviewsApi,
+  getReviewApi,
 } from "../apiCall/githubApi";
 import type {
   Repo,
   Pull,
   Review,
   ReviewIssue,
+  ReviewListItem,
   PostReviewResult,
   GithubConnection,
   CreateReviewInput,
 } from "../types/github";
+
+export const useReviews = (): UseQueryResult<ReviewListItem[], Error> => {
+  return useQuery<ReviewListItem[], Error>({
+    queryKey: ["reviews", "list"],
+    queryFn: async (): Promise<ReviewListItem[]> => {
+      const res = await getReviewsApi();
+      return res.data.data ?? [];
+    },
+    retry: false,
+    staleTime: 30 * 1000,
+  });
+};
+
+export const useReview = (id: string | null): UseQueryResult<Review, Error> => {
+  return useQuery<Review, Error>({
+    queryKey: ["reviews", id],
+    enabled: Boolean(id),
+    queryFn: async (): Promise<Review> => {
+      const res = await getReviewApi(id as string);
+      return res.data.data;
+    },
+    retry: false,
+  });
+};
 
 export const useGithubConnection = (): UseQueryResult<
   GithubConnection[],
@@ -112,10 +140,15 @@ export const usePostReview = (): UseMutationResult<
   Error,
   string
 > => {
+  const queryClient = useQueryClient();
   return useMutation<PostReviewResult, Error, string>({
     mutationFn: async (reviewId: string): Promise<PostReviewResult> => {
       const res = await postReviewApi(reviewId);
       return res.data.data;
+    },
+    onSuccess: () => {
+      // keep the history list's "posted" badge accurate
+      queryClient.invalidateQueries({ queryKey: ["reviews", "list"] });
     },
   });
 };

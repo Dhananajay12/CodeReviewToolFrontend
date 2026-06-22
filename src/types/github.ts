@@ -64,3 +64,14 @@ export interface CreateReviewInput {
   repoId: string;
   prNumber: number;
 }
+
+export interface ReviewListItem {
+  id: string;
+  repoFullName: string;
+  prNumber: number;
+  prTitle: string | null;
+  status: string;
+  createdAt: string;
+  issueCount: number;
+  isPosted: boolean;
+}

@@ -4,7 +4,7 @@ import { notify, getErrorMessage } from "../helpers/toast";
 import SettingsModal from "./SettingsModal";
 import type { CurrentUser } from "../types/auth";
 
-export type AppView = "code" | "pr";
+export type AppView = "code" | "pr" | "history";
 
 type SidebarProps = {
   user: CurrentUser;
@@ -159,6 +159,37 @@ function Sidebar({ user, view, onNavigate }: SidebarProps) {
             <path d="M18 6a9 9 0 0 1-9 9" />
           </svg>
           {!collapsed && "PR Review"}
+        </button>
+
+        <button
+          type="button"
+          onClick={() => onNavigate("history")}
+          aria-current={view === "history" ? "page" : undefined}
+          title={collapsed ? "History" : undefined}
+          className={`flex items-center gap-3 rounded-xl py-2.5 text-sm font-medium transition ${
+            collapsed ? "justify-center px-0" : "px-3"
+          } ${
+            view === "history"
+              ? "bg-violet-400/10 text-violet-200"
+              : "text-white/60 hover:bg-white/5 hover:text-white/90"
+          }`}
+        >
+          <svg
+            width="17"
+            height="17"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="flex-shrink-0"
+          >
+            <path d="M3 3v5h5" />
+            <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8" />
+            <path d="M12 7v5l4 2" />
+          </svg>
+          {!collapsed && "History"}
         </button>
       </nav>
 
